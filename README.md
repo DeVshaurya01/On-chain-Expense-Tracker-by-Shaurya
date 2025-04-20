@@ -1,70 +1,93 @@
-# Getting Started with Create React App
+#### Features added in the d-app:
+1)Enabled user to edit their registered name after registering themselves with their wallet i.e., on the main application which tracks expenses:
+made following changes in the solidity code:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+````
+function updatePersonName(string memory _newName) public {
+    // Ensure that the new name is not an empty string
+    require(bytes(_newName).length > 0, "Name cannot be empty");
 
-## Available Scripts
+    // Check that the caller (msg.sender) is already registered
+    // If their wallet address is not stored, they are not registered
+    require(
+        people[msg.sender].walletAddress != address(0),
+        "Person is not registered"
+    );
 
-In the project directory, you can run:
+    // Update the name in the 'people' mapping
+    people[msg.sender].name = _newName;
 
-### `npm start`
+    // Emit an event to signal that the name was updated
+    // This is useful for UI updates or logs on the blockchain
+    emit PersonNameUpdated(msg.sender, _newName);
+}
+````
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+#### in the app .js:
+````
+// --- UPDATE USER NAME ---
+  // Changes the user's name on the blockchain
+  const updateName = async () => {
+    if (!newName.trim()) {
+      alert("Please enter a name.");
+      return;
+    }
 
-### `npm test`
+    try {
+      // Call the updatePersonName function in our smart contract
+      const tx = await contract.updatePersonName(newName.trim());
+      await tx.wait();  // Wait for transaction to be confirmed
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+      // Update the name in local state
+      setName(newName.trim());
+      setNewName('');
+      setIsEditingName(false);
+      alert("Name updated successfully!");
+    } catch (error) {
+      console.error("Name update failed:", error);
+      alert(`Name update failed: ${error.message}`);
+    }
+  };
+````
 
-### `npm run build`
+#### in return block:
+````
+ <button onClick={() => setIsEditingName(!isEditingName)} style={{ marginLeft: '10px', fontSize: '0.8em' }}>
+                  {isEditingName ? "Cancel" : "Edit Name"}
+                </button>
+                {isEditingName && (
+                  <div style={{ margin: '10px 0' }}>
+                    <input
+                      type="text"
+                      placeholder="New Name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                    />
+                    <button onClick={updateName}>Update Name</button>
+                  </div>
+                )}
+````
+<img src="https://github.com/DeVshaurya01/On-chain-Expense-Tracker-by-Shaurya/blob/main/Screenshot%202025-04-20%20183534.png">
+and the input box appears like this
+<img src="https://github.com/DeVshaurya01/On-chain-Expense-Tracker-by-Shaurya/blob/main/Screenshot%202025-04-20%20183551.png">
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### 2)added a button called refresh people which refreshes the users registered after changing the name
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### 3)made changes in the css file, made the ui a little more appealing by adding gradient on the upper side
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### 4)added the feature to see the current wallet address of the person from the js file
+````
+<p>Account: {account}</p>
+````
+#### 5)added the feature to see the total no of registered users using the js file 
+  instead of creating a contract in solidity for counting up the registered people i used the length of people array to determine the no of registered users
+  ```` <p>Total Registered Users: {people.length}</p>````
+#### 6)added a feature to see the current time from the starting window
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### trials:
+tried to get the username of the person from his wallet address registered on the platform by using solididty code and react. but the file ended up with lots of bugging and i couldnt figure out the code. 
+thats why the get my name button on my d-app is invalid. 
+created a jsx file and imported it into main app.js
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
