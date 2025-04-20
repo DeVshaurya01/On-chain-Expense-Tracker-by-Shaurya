@@ -28,6 +28,49 @@ function updatePersonName(string memory _newName) public {
     emit PersonNameUpdated(msg.sender, _newName);
 }
 
+in the app .js:
+
+// --- UPDATE USER NAME ---
+  // Changes the user's name on the blockchain
+  const updateName = async () => {
+    if (!newName.trim()) {
+      alert("Please enter a name.");
+      return;
+    }
+
+    try {
+      // Call the updatePersonName function in our smart contract
+      const tx = await contract.updatePersonName(newName.trim());
+      await tx.wait();  // Wait for transaction to be confirmed
+
+      // Update the name in local state
+      setName(newName.trim());
+      setNewName('');
+      setIsEditingName(false);
+      alert("Name updated successfully!");
+    } catch (error) {
+      console.error("Name update failed:", error);
+      alert(`Name update failed: ${error.message}`);
+    }
+  };
+
+in return block:
+ <button onClick={() => setIsEditingName(!isEditingName)} style={{ marginLeft: '10px', fontSize: '0.8em' }}>
+                  {isEditingName ? "Cancel" : "Edit Name"}
+                </button>
+                {isEditingName && (
+                  <div style={{ margin: '10px 0' }}>
+                    <input
+                      type="text"
+                      placeholder="New Name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                    />
+                    <button onClick={updateName}>Update Name</button>
+                  </div>
+                )}
+
+
 2)added a button called refresh people which refreshes the users registered after changing the name
 
 3)made changes in the css file, made the ui a little more appealing by adding gradient on the upper side
