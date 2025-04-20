@@ -28,7 +28,9 @@ function updatePersonName(string memory _newName) public {
 ````
 // --- UPDATE USER NAME ---
   // Changes the user's name on the blockchain
-  const updateName = async () => {
+const [newName, setNewName] = useState('');
+const [isEditingName, setIsEditingName] = useState(false);
+const updateName = async () => {
     if (!newName.trim()) {
       alert("Please enter a name.");
       return;
